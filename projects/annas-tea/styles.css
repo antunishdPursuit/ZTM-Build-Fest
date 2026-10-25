@@ -686,3 +686,61 @@ dd {
   .header h1 { grid-column:1/-1; grid-row:2; margin-bottom:var(--s1); }
   .lesson-stages { padding:0 var(--s4); gap:0 var(--s4); }
 }
+
+/* The experiment is a compact work area over one continuous shop scene. */
+.experiment-stage { position:relative; display:flex; align-items:flex-start; justify-content:flex-end; min-height:calc(100svh - 6.75rem); padding:var(--s6); background:var(--line); }
+.experiment-stage > .scene { position:absolute; inset:0; background:var(--line); }
+.experiment-stage > .scene img { width:calc(100% - 23rem); height:100%; object-fit:contain; object-position:left center; }
+.experiment-stage > .scene .image-fallback { max-width:50%; }
+.experiment-stage .experiment-pane { position:relative; width:28rem; max-width:100%; padding:var(--s6); background:var(--cream); border:1px solid var(--line); border-radius:var(--hero-radius); box-shadow:var(--shadow); }
+.experiment-stage h2 { margin-bottom:var(--s2); }
+.experiment-stage .fields { grid-template-columns:1fr 1fr; gap:var(--s3) var(--s4); margin-top:var(--s4); }
+.experiment-stage .field { flex-direction:column; align-items:stretch; gap:var(--s2); }
+.experiment-stage .field label { min-height:2.75rem; display:flex; flex-direction:column; justify-content:flex-end; }
+.field-note { font-size:var(--caption); color:var(--muted); font-weight:400; }
+.experiment-stage .field input,.experiment-stage .field select { width:100%; max-width:none; }
+.experiment-stage .discount-preview { margin-top:var(--s3); }
+.experiment-stage form details { margin-top:var(--s2); }
+.experiment-actions { display:flex; align-items:center; gap:var(--s2); margin-top:var(--s3); }
+.experiment-actions .primary { flex:1; }
+.experiment-stage .primary { margin-top:0; }
+.experiment-stage .text-button { padding:var(--s2) var(--s3); }
+.experiment-stage .run-result { margin-top:var(--s4); padding-top:var(--s4); }
+.experiment-stage .run-result .primary { margin-top:var(--s3); width:100%; }
+.experiment-stage .day-comparison { margin:var(--s2) 0; }
+.experiment-stage .day-comparison th,.experiment-stage .day-comparison td { padding:var(--s2); }
+.experiment-stage .day-comparison .profit-row { font-size:var(--narration); }
+.experiment-stage .result-actions { margin-top:var(--s2); }
+.summary-shell { max-width:none; }
+.summary-ending { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); align-items:center; gap:var(--s6); padding:var(--s6); min-height:calc(100svh - 6.75rem); }
+.summary-portrait { min-width:0; }
+.summary-portrait img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; object-position:left center; border-radius:var(--hero-radius); }
+.summary-portrait .image-fallback { display:none; }
+.summary-portrait.failed img { display:none; }
+.summary-portrait.failed .image-fallback { display:block; padding:var(--s6); }
+.summary-panel { min-width:0; padding:var(--s6); background:var(--surface); border:1px solid var(--line); border-radius:var(--hero-radius); }
+.summary-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--s2) var(--s6); }
+.scenario-snapshot { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:end; gap:var(--s4); padding:var(--s4) 0; margin:var(--s4) 0; border-block:1px solid var(--line); }
+.scenario-snapshot dd { font-size:var(--narration); }
+.summary-breakdowns { display:grid; grid-template-columns:1fr 1fr; gap:var(--s6); }
+.summary-breakdowns > section { min-width:0; }
+.summary-breakdowns h2 { font-size:var(--section); }
+.summary-breakdowns .ledger { margin-top:var(--s3); }
+.summary-breakdowns .ledger caption { font-size:var(--caption); color:var(--muted); font-weight:400; }
+.summary-panel .result-actions { margin-top:var(--s6); }
+@media(max-width:959px) {
+  .experiment-stage { display:block; padding:0 0 var(--s4); min-height:0; }
+  .experiment-stage > .scene { position:relative; }
+  .experiment-stage > .scene img { width:100%; height:auto; }
+  .experiment-stage .experiment-pane { width:auto; margin:0 var(--s4); }
+  .summary-ending { grid-template-columns:1fr; }
+  .summary-portrait img { aspect-ratio:3/2; max-height:20rem; object-fit:contain; }
+}
+@media(max-width:599px) {
+  .experiment-stage .experiment-pane { padding:var(--s4); }
+  .experiment-actions { flex-wrap:wrap; }
+  .summary-ending { padding:var(--s4); gap:var(--s4); }
+  .summary-panel { padding:var(--s4); }
+  .scenario-snapshot { grid-template-columns:1fr 1fr; }
+  .summary-breakdowns { grid-template-columns:1fr; }
+}

@@ -142,19 +142,16 @@ function experiment() {
   const run = state.runs[state.mode];
   const dirty = state.dirty[state.mode];
   return `<div class="shell experiment-shell">${header('Try a promotion')}${stages('Your turn')}
-    <div class="experiment-layout"><div>${scene()}<p class="experiment-picture-copy">Find the point where the promotion stops helping.</p></div>
+    <div class="experiment-layout experiment-stage">${scene()}
     <section class="experiment-pane" aria-label="Promotion experiment"><h2>What would you change?</h2>
     <p class="baseline-reference">Normal day stays at ${state.setup.cups} cups at ${money(state.setup.priceCents)}.</p>
     <form id="experiment-form"><div class="fields">
-      <div class="field"><label for="experiment-cups">Cups sold</label><input id="experiment-cups" type="number" name="cups" min="80" max="180" step="10" required value="${escape(draft.cups)}" aria-describedby="turnout-hint"></div>
-      <p class="hint" id="turnout-hint">Assumed turnout, not a forecast.</p>
-      <div class="field"><label for="experiment-price">Price before discount</label><input id="experiment-price" type="number" name="price" min="3" max="10" step="0.5" required value="${escape(draft.price)}" aria-describedby="campaign-price-hint"></div>
-      <p class="hint" id="campaign-price-hint">Promotion only; the normal-day price stays fixed.</p>
+      <div class="field"><label for="experiment-cups">Cups sold per day</label><input id="experiment-cups" type="number" name="cups" min="80" max="180" step="10" required value="${escape(draft.cups)}" aria-describedby="campaign-hint"></div>
+      <div class="field"><label for="experiment-price">Selling price ($)<span class="field-note">Before discount</span></label><input id="experiment-price" type="number" name="price" min="3" max="10" step="0.5" required value="${escape(draft.price)}" aria-describedby="campaign-hint"></div>
       <div class="field"><label for="experiment-discount">Discount (%)</label><input id="experiment-discount" type="number" name="discount" min="0" max="100" step="1" required value="${escape(draft.discount)}" aria-describedby="discount-preview"></div>
-      <p class="discount-preview" id="discount-preview">${draftPricePreview(draft)}</p>
       <div class="field"><label for="experiment-staff">Extra staffing</label><select id="experiment-staff" name="staffing">${STAFF_OPTIONS.map(cents => `<option value="${cents}" ${String(cents) === draft.staffing ? 'selected' : ''}>${wholeMoney(cents)}</option>`).join('')}</select></div>
-    </div>${costs()}<p id="experiment-error" class="error" role="alert"></p>
-    <button class="primary" type="submit">Run the day</button>${button('restore', 'Restore promotion')}</form>
+    </div><p class="hint" id="campaign-hint">Promotion inputs; cups are assumed, not forecast.</p><p class="discount-preview" id="discount-preview">${draftPricePreview(draft)}</p>${costs()}<p id="experiment-error" class="error" role="alert"></p>
+    <div class="experiment-actions"><button class="primary" type="submit">Run the day</button>${button('restore', 'Restore promotion')}</div></form>
     <div class="run-result"><p id="run-status" tabindex="-1" class="${dirty ? 'stale' : ''}">${run ? dirty ? 'Inputs changed. Run the day to update the result.' : `${outcomeLabel(run)}. ${comparison(run)}` : 'Run the day to compare results.'}</p>
       ${run && !dirty ? `${comparisonTable(run.baseline, run.day)}<details><summary>Promotion breakdown</summary>${ledger(run.day)}</details>` : ''}
       <button class="primary" type="button" data-action="results" ${!run || dirty ? 'disabled' : ''}>See summary</button>
@@ -173,14 +170,22 @@ function ending() {
   const run = state.runs[state.mode];
   if (!run || state.dirty[state.mode]) { state.screen = 'experiment'; return experiment(); }
   const monthly = monthlyEstimate(run.day);
-  return `<div class="shell">${header('Your result')}${stages('Your turn')}<section class="ending" aria-label="Anna and her teammate outside the shop"><div class="ending-panel">${figures([['Revenue', wholeMoney(run.day.revenueCents)], ['Costs', wholeMoney(run.day.totalCostCents)], ['Profit', wholeMoney(run.day.profitCents)]])}<p class="outcome ${run.outcome === 'loss' ? 'negative' : run.outcome === 'profit' ? 'positive' : ''}">${outcomeLabel(run)}</p><p>${comparison(run)}</p><p class="hint">Normal-day profit: ${wholeMoney(run.baseline.profitCents)}.</p><details><summary>Daily breakdown</summary>${ledger(run.day)}</details><details><summary>Monthly estimate</summary><p>26 identical trading days: <strong>${wholeMoney(monthly.profitCents)} ${monthly.profitCents < 0 ? 'loss' : 'profit'}</strong>.</p>${ledger(monthly, 'Monthly estimate — 26 identical trading days')}</details><div class="result-actions">${button('experiment', 'Try again', true)}${button('home', 'Back to welcome')}</div></div></section></div>`;
+  return `<div class="shell summary-shell">${header('Your result')}${stages('Your turn')}
+    <section class="summary-ending" aria-label="Completed promotion summary">
+      <div class="summary-portrait"><img src="assets/anna-and-teammate.png" alt="Anna and her teammate welcoming you outside the shop."><p class="image-fallback">Anna and her teammate outside the shop.</p></div>
+      <div class="summary-panel"><div class="summary-heading"><p class="outcome ${run.outcome === 'loss' ? 'negative' : run.outcome === 'profit' ? 'positive' : ''}">${outcomeLabel(run)}</p><p>${comparison(run)}</p></div>
+      <p class="hint">Normal day: ${run.baseline.cups} cups at ${money(run.baseline.priceCents)}; ${wholeMoney(run.baseline.profitCents)} profit.</p>
+      <dl class="scenario-snapshot"><div><dt>Cups sold per day</dt><dd>${run.day.cups}</dd></div><div><dt>Selling price before discount</dt><dd>${money(run.priceBeforeDiscountCents)}</dd></div><div><dt>Discount</dt><dd>${run.promotion.percent}%</dd></div><div><dt>Price charged per cup</dt><dd>${money(run.day.priceCents)}</dd></div></dl>
+      <div class="summary-breakdowns"><section aria-labelledby="daily-heading"><h2 id="daily-heading">Daily breakdown</h2>${ledger(run.day, 'Promotion day · USD')}</section><section aria-labelledby="monthly-heading"><h2 id="monthly-heading">Monthly estimate</h2>${ledger(monthly, '26 identical trading days · USD')}</section></div>
+      <div class="result-actions">${button('experiment', 'Try again', true)}${button('home', 'Back to welcome')}</div></div>
+    </section></div>`;
 }
 function render(focus = true) {
   document.querySelector('#result-announcement').textContent = '';
   document.body.dataset.screen = state.screen;
   app.innerHTML = state.screen === 'welcome' ? welcome() : state.screen === 'experiment' ? experiment() : state.screen === 'results' ? ending() : guidedScreen();
-  for (const img of app.querySelectorAll('.scene img')) {
-    const fail = () => img.closest('.scene').classList.add('failed');
+  for (const img of app.querySelectorAll('.scene img,.summary-portrait img')) {
+    const fail = () => img.closest('.scene,.summary-portrait').classList.add('failed');
     img.addEventListener('error', fail);
     if (img.complete && !img.naturalWidth) fail();
   }

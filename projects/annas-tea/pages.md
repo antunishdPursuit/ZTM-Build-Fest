@@ -10,8 +10,8 @@ This browser application uses in-memory screen state rather than server routes. 
 | Prediction | Predict the effect of the worked promotion before the reveal | Choose a response, then Continue |
 | Promotion | See the discounted price, assumed turnout and additional cup costs | Back / Continue |
 | Comparison | Show normal/promotion daily revenue, total costs and profit side by side; explain the difference | Back / Continue |
-| Experiment | Edit cups, price before discount, percentage discount and extra staffing; calculate directly | Run the day / See summary |
-| Results | Show completed daily figures and an optional monthly estimate | Try again / Back to welcome |
+| Experiment | Compact controls/results overlay the shop scene on wide screens; edit cups per day, selling price before discount, percentage and staffing | Run the day / See summary |
+| Results | Show the selected campaign inputs, normal-day reference, and open daily/monthly tables side by side on wide screens | Try again / Back to welcome |
 
 ## Model and state
 
@@ -23,6 +23,7 @@ This browser application uses in-memory screen state rather than server routes. 
 - Restore promotion resets all campaign inputs (140 cups, normal-day price, 10% discount, no extra staffing), without replacing the baseline. Starting a changed Explore setup creates a new reference and resets dependent inputs/results.
 - Guided and Explore keep separate experiment drafts during the session. Restart lesson restores Guided presets.
 - Monthly estimates multiply every included revenue and cost line by 26 identical trading days.
+- The summary snapshots cups sold per day, selling price before discount, discount percent and actual price charged, using the completed run rather than a draft. Daily/monthly tables stack on narrow screens. The experiment also becomes image-then-controls on narrow screens so fields and results remain readable without covering the characters.
 - Answers are session-only and persist across Back/Continue. A new/restarted lesson clears them. On question and prediction screens Continue is disabled until any answer is selected. Correctness never prevents continuation; explanatory feedback supports learning, without scores.
 - The fluid lesson frame uses a compact header, Sales / Costs / Promotion / Your turn indicators, a larger static scene and one teaching region. Back/Continue sits immediately beneath the scene on wide screens, and follows the teaching region on narrow screens for a natural reading order. The order/preparation/payment strip is removed. Comparison figures serve deliberate cross-day recall. Stage indicators do not skip steps.
 
