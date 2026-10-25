@@ -27,7 +27,7 @@ function header(title) {
   return `<header class="header"><button class="brand" data-action="home" type="button" aria-label="Anna’s Tea — back to welcome">Anna’s Tea</button><div class="header-side">${heading(title)}${button('restart', 'Restart lesson')}</div></header>`;
 }
 function scene() {
-  return '<div class="scene"><img src="assets/working-shop.png" alt="Anna takes an order while her employee prepares bubble tea behind the counter."><p class="image-fallback">Anna takes orders. Her employee prepares the tea. The lesson’s figures and explanations are available below.</p></div>';
+  return '<div class="scene"><img src="assets/working-shop.webp" alt="Anna takes an order while her employee prepares bubble tea behind the counter."><p class="image-fallback">Anna takes orders. Her employee prepares the tea. The lesson’s figures and explanations are available below.</p></div>';
 }
 function stages(current) {
   return `<ol class="lesson-stages" aria-label="Lesson stages">${['Sales', 'Costs', 'Promotion', 'Your turn'].map(label => `<li ${label === current ? 'aria-current="step"' : ''}>${label}</li>`).join('')}</ol>`;
@@ -169,7 +169,7 @@ function ending() {
   const monthly = monthlyEstimate(run.day);
   return `<div class="shell summary-shell">${header('Your result')}${stages('Your turn')}
     <section class="summary-ending" aria-label="Completed promotion summary">
-      <div class="summary-portrait"><img src="assets/anna-and-teammate.png" alt="Anna and her teammate welcoming you outside the shop."><p class="image-fallback">Anna and her teammate outside the shop.</p></div>
+      <div class="summary-portrait"><img src="assets/anna-and-teammate.webp" alt="Anna and her teammate welcoming you outside the shop."><p class="image-fallback">Anna and her teammate outside the shop.</p></div>
       <div class="summary-panel"><div class="summary-heading"><p class="outcome ${run.outcome === 'loss' ? 'negative' : run.outcome === 'profit' ? 'positive' : ''}">${outcomeLabel(run)}</p><p>${comparison(run)}</p></div>
       <p class="hint">Normal day: ${run.baseline.cups} cups at ${money(run.baseline.priceCents)}; ${wholeMoney(run.baseline.profitCents)} profit.</p>
       <dl class="scenario-snapshot"><div><dt>Cups sold per day</dt><dd>${run.day.cups}</dd></div><div><dt>Selling price before discount</dt><dd>${money(run.priceBeforeDiscountCents)}</dd></div><div><dt>Discount</dt><dd>${run.promotion.percent}%</dd></div><div><dt>Price charged per cup</dt><dd>${money(run.day.priceCents)}</dd></div></dl>

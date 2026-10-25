@@ -7,7 +7,7 @@ test('preview serves application files but not source tests, docs or traversal',
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}`;
-  for (const [file, contentType] of [['/', 'text/html'], ['/styles.css', 'text/css'], ['/src/model.js', 'text/javascript'], ['/assets/favicon.svg', 'image/svg+xml']]) {
+  for (const [file, contentType] of [['/', 'text/html'], ['/styles.css', 'text/css'], ['/src/model.js', 'text/javascript'], ['/assets/favicon.svg', 'image/svg+xml'], ['/assets/working-shop.webp', 'image/webp']]) {
     const response = await fetch(base + file);
     assert.equal(response.status, 200);
     assert.ok(response.headers.get('content-type').startsWith(contentType));

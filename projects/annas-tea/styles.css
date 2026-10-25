@@ -153,7 +153,7 @@ h1:focus {
   padding:var(--s12);
   display:flex;
   align-items:center;
-  background:var(--cream) url('assets/neighborhood.png') center/cover no-repeat
+  background:var(--cream) url('assets/neighborhood.webp') center/cover no-repeat
 }
 
 .mode {
