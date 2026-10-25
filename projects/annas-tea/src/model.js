@@ -4,6 +4,11 @@ export const GUIDED = Object.freeze({ cups: 100, priceCents: 500 });
 export const PROMOTION = Object.freeze({ kind: 'percent-off', percent: 10 });
 export const DEFAULT_EXPERIMENT = Object.freeze({ cups: 140, extraStaffCents: 0 });
 export const STAFF_OPTIONS = Object.freeze([0, 5000, 10000, 15000]);
+export const INPUT_LIMITS = Object.freeze({
+  cups: Object.freeze({ min: 80, max: 180, step: 10 }),
+  priceCents: Object.freeze({ min: 300, max: 1000, step: 50 }),
+  discount: Object.freeze({ min: 0, max: 100, step: 1 })
+});
 
 function integer(value, name, min = 0, max = 100000000) {
   if (!Number.isSafeInteger(value) || value < min || value > max) throw new RangeError(`${name} is outside the supported range.`);
@@ -18,22 +23,54 @@ export function moneyToCents(value) {
 }
 
 export function validateSetup({ cups, priceCents }) {
-  integer(cups, 'Cups', 80, 180);
-  integer(priceCents, 'Price', 300, 1000);
-  if (cups % 10 !== 0) throw new RangeError('Use 80–180 cups, in steps of 10.');
-  if (priceCents % 50 !== 0) throw new RangeError('Use $3–$10, in steps of $0.50.');
+  validateCups(cups);
+  validatePrice(priceCents);
   return Object.freeze({ cups, priceCents });
 }
 
 export function validateExperiment({ cups, extraStaffCents, priceCents }) {
-  integer(cups, 'Cups', 80, 180);
-  if (cups % 10 !== 0) throw new RangeError('Use 80–180 cups, in steps of 10.');
+  validateCups(cups);
   if (!STAFF_OPTIONS.includes(extraStaffCents)) throw new RangeError('Choose an available staffing cost.');
-  if (priceCents !== undefined) {
-    integer(priceCents, 'Promotion price', 300, 1000);
-    if (priceCents % 50 !== 0) throw new RangeError('Use a promotion price of $3–$10, in steps of $0.50.');
-  }
+  if (priceCents !== undefined) validatePrice(priceCents);
   return Object.freeze({ cups, extraStaffCents, ...(priceCents !== undefined ? { priceCents } : {}) });
+}
+
+function validateCups(cups) {
+  const { min, max, step } = INPUT_LIMITS.cups;
+  integer(cups, 'Cups', min, max);
+  if ((cups - min) % step) throw new RangeError(`Use ${min}–${max} cups, in steps of ${step}.`);
+}
+
+function validatePrice(priceCents) {
+  const { min, max, step } = INPUT_LIMITS.priceCents;
+  integer(priceCents, 'Price', min, max);
+  if ((priceCents - min) % step) throw new RangeError(`Use $${min / 100}–$${max / 100}, in steps of $${(step / 100).toFixed(2)}.`);
+}
+
+function inputNumber(value, name) {
+  if (!['string', 'number'].includes(typeof value) || String(value).trim() === '') throw new RangeError(`Enter ${name}.`);
+  return Number(value);
+}
+
+function validateDiscount(percent) {
+  const { min, max, step } = INPUT_LIMITS.discount;
+  integer(percent, 'Discount', min, max);
+  if ((percent - min) % step) throw new RangeError(`Use discounts in steps of ${step}%.`);
+}
+
+// Shared parsing for editable HTML drafts; financial rules never depend on DOM state.
+export function parsePromotionDraft({ price, discount }) {
+  const priceCents = moneyToCents(price);
+  validatePrice(priceCents);
+  const percent = inputNumber(discount, 'a whole-number discount from 0 to 100');
+  validateDiscount(percent);
+  return Object.freeze({ priceCents, promotion: Object.freeze({ kind: 'percent-off', percent }) });
+}
+
+export function parseExperimentDraft({ cups, staffing, price, discount }) {
+  const parsed = parsePromotionDraft({ price, discount });
+  const inputs = validateExperiment({ cups: inputNumber(cups, 'cups sold'), extraStaffCents: inputNumber(staffing, 'a staffing cost'), priceCents: parsed.priceCents });
+  return Object.freeze({ inputs, promotion: parsed.promotion });
 }
 
 // The lesson selects 10%; the rule accepts other percentages without UI changes.
@@ -41,7 +78,7 @@ export function validateExperiment({ cups, extraStaffCents, priceCents }) {
 export function promotionalPrice(priceCents, promotion = PROMOTION) {
   integer(priceCents, 'Price');
   if (promotion?.kind !== 'percent-off') throw new RangeError('Unsupported promotion type.');
-  integer(promotion.percent, 'Discount', 0, 100);
+  validateDiscount(promotion.percent);
   // Round the discounted unit price once, then multiply by completed cups.
   return Math.round(priceCents * (100 - promotion.percent) / 100);
 }

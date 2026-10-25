@@ -1,6 +1,6 @@
-import { GUIDED, PROMOTION, DEFAULT_EXPERIMENT, STAFF_OPTIONS, LESSON,
-  calculateDay, validateSetup, validateExperiment, moneyToCents, runPromotion,
-  promotionalPrice, monthlyEstimate } from './model.js';
+import { GUIDED, PROMOTION, DEFAULT_EXPERIMENT, STAFF_OPTIONS, LESSON, INPUT_LIMITS,
+  calculateDay, validateSetup, moneyToCents, runPromotion,
+  promotionalPrice, monthlyEstimate, parsePromotionDraft, parseExperimentDraft } from './model.js';
 
 const app = document.querySelector('#app');
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
@@ -15,7 +15,6 @@ const baseline = () => calculateDay(state.setup);
 const demonstration = () => runPromotion(state.setup, DEFAULT_EXPERIMENT);
 const button = (action, label, primary = false) => `<button type="button" data-action="${action}" class="${primary ? 'primary' : 'text-button'}">${label}</button>`;
 const heading = text => `<h1 id="main-heading" tabindex="-1">${text}</h1>`;
-const figures = entries => `<dl class="figures">${entries.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl>`;
 const costs = () => `<details><summary>Cost assumptions</summary><p>${money(LESSON.costPerCupCents)} per cup; ${wholeMoney(LESSON.operatingCostCents)} daily operating costs, including base staffing.</p></details>`;
 function ledger(day, label = 'Daily breakdown') {
   return `<table class="ledger"><caption>${label}</caption><tbody>${[
@@ -27,8 +26,8 @@ function ledger(day, label = 'Daily breakdown') {
 function header(title) {
   return `<header class="header"><button class="brand" data-action="home" type="button" aria-label="Anna’s Tea — back to welcome">Anna’s Tea</button><div class="header-side">${heading(title)}${button('restart', 'Restart lesson')}</div></header>`;
 }
-function scene(hotspot = '') {
-  return `<div class="scene"><img src="assets/working-shop.png" alt="Anna takes an order while her employee prepares bubble tea behind the counter."><p class="image-fallback">Anna takes orders. Her employee prepares the tea. The lesson’s figures and explanations are available below.</p>${hotspot ? `<button class="hotspot" type="button" data-action="detail" aria-expanded="false" aria-controls="scene-detail">${hotspot}</button>` : ''}</div>`;
+function scene() {
+  return '<div class="scene"><img src="assets/working-shop.png" alt="Anna takes an order while her employee prepares bubble tea behind the counter."><p class="image-fallback">Anna takes orders. Her employee prepares the tea. The lesson’s figures and explanations are available below.</p></div>';
 }
 function stages(current) {
   return `<ol class="lesson-stages" aria-label="Lesson stages">${['Sales', 'Costs', 'Promotion', 'Your turn'].map(label => `<li ${label === current ? 'aria-current="step"' : ''}>${label}</li>`).join('')}</ol>`;
@@ -43,7 +42,7 @@ function understandingCheck(id, prompt, choices) {
   </section>`;
 }
 function frame({ title, stage, question, body, calculation = '', explanation = '',
-  detail = '', check = '', next, back, nextTopic, process = 'payment', answerKey = '' }) {
+  detail = '', check = '', next, back, nextTopic, answerKey = '' }) {
   const needsAnswer = answerKey === 'prediction' ? !state.prediction : answerKey ? !state.answers[answerKey] : false;
   return `<div class="shell lesson-shell">${header(title)}${stages(stage)}
     <div class="lesson-layout"><section class="lesson-visual" aria-label="The shop">
@@ -73,7 +72,7 @@ function welcome() {
   </div><form class="setup-form" id="setup-form" aria-label="Lesson setup">
     <div class="mode" role="group" aria-label="Learning mode"><button type="button" data-action="guided" aria-pressed="${guided}">Guided lesson</button><button type="button" data-action="explore" aria-pressed="${!guided}">Explore</button></div>
     <p class="mode-description">${guided ? 'Follow the lesson, then try your own changes.' : 'Set your normal day, then test a promotion.'}</p>
-    <div class="fields"><div class="field"><label for="setup-cups">Cups per day</label>${guided ? '<output id="setup-cups">100</output>' : `<input id="setup-cups" name="cups" type="number" min="80" max="180" step="10" required value="${escape(state.setupDraft.cups)}">`}</div><div class="field"><label for="setup-price">Price per cup</label>${guided ? '<output id="setup-price">$5.00</output>' : `<input id="setup-price" name="price" type="number" min="3" max="10" step="0.5" required value="${escape(state.setupDraft.price)}">`}</div></div>
+    <div class="fields"><div class="field"><label for="setup-cups">Cups per day</label>${guided ? '<output id="setup-cups">100</output>' : `<input id="setup-cups" name="cups" type="number" min="${INPUT_LIMITS.cups.min}" max="${INPUT_LIMITS.cups.max}" step="${INPUT_LIMITS.cups.step}" required value="${escape(state.setupDraft.cups)}">`}</div><div class="field"><label for="setup-price">Price per cup</label>${guided ? '<output id="setup-price">$5.00</output>' : `<input id="setup-price" name="price" type="number" min="${INPUT_LIMITS.priceCents.min / 100}" max="${INPUT_LIMITS.priceCents.max / 100}" step="${INPUT_LIMITS.priceCents.step / 100}" required value="${escape(state.setupDraft.price)}">`}</div></div>
     ${costs()}<p class="error" id="setup-error" role="alert"></p>
     <button type="submit" class="primary">${guided ? 'Start lesson' : 'Explore shop'}</button>
   </form></section>`;
@@ -95,7 +94,7 @@ function guidedScreen() {
         { value: 'anna', label: 'Anna’s Tea', feedback: 'We cannot tell yet. What each shop keeps depends on its costs as well as its sales.' },
         { value: 'unknown', label: 'Not enough information', feedback: 'We need both shops’ costs. A busier shop can bring in more money and still keep less.' }
       ]), answerKey: 'revenue', next: 'costs', back: 'home', nextTopic: 'what it costs to make and sell the tea.' });
-    case 'costs': return frame({ title: 'Where the money goes', stage: 'Costs', process: 'prepare',
+    case 'costs': return frame({ title: 'Where the money goes', stage: 'Costs',
       question: 'What does the shop keep?',
       body: `Ingredients and packaging cost ${wholeMoney(day.costPerCupCents)} per cup: ${day.cups} × ${wholeMoney(day.costPerCupCents)} = ${wholeMoney(day.variableCostCents)}. Base staffing, rent and utilities are set at ${wholeMoney(day.operatingCostCents)} for this example day.`,
       calculation: `${wholeMoney(day.revenueCents)} − (${wholeMoney(day.variableCostCents)} + ${wholeMoney(day.operatingCostCents)}) = ${wholeMoney(day.profitCents)}`,
@@ -146,9 +145,9 @@ function experiment() {
     <section class="experiment-pane" aria-label="Promotion experiment"><h2>What would you change?</h2>
     <p class="baseline-reference">Normal day stays at ${state.setup.cups} cups at ${money(state.setup.priceCents)}.</p>
     <form id="experiment-form"><div class="fields">
-      <div class="field"><label for="experiment-cups">Cups sold per day</label><input id="experiment-cups" type="number" name="cups" min="80" max="180" step="10" required value="${escape(draft.cups)}" aria-describedby="campaign-hint"></div>
-      <div class="field"><label for="experiment-price">Selling price ($)<span class="field-note">Before discount</span></label><input id="experiment-price" type="number" name="price" min="3" max="10" step="0.5" required value="${escape(draft.price)}" aria-describedby="campaign-hint"></div>
-      <div class="field"><label for="experiment-discount">Discount (%)</label><input id="experiment-discount" type="number" name="discount" min="0" max="100" step="1" required value="${escape(draft.discount)}" aria-describedby="discount-preview"></div>
+      <div class="field"><label for="experiment-cups">Cups sold per day</label><input id="experiment-cups" type="number" name="cups" min="${INPUT_LIMITS.cups.min}" max="${INPUT_LIMITS.cups.max}" step="${INPUT_LIMITS.cups.step}" required value="${escape(draft.cups)}" aria-describedby="campaign-hint"></div>
+      <div class="field"><label for="experiment-price">Selling price ($)<span class="field-note">Before discount</span></label><input id="experiment-price" type="number" name="price" min="${INPUT_LIMITS.priceCents.min / 100}" max="${INPUT_LIMITS.priceCents.max / 100}" step="${INPUT_LIMITS.priceCents.step / 100}" required value="${escape(draft.price)}" aria-describedby="campaign-hint"></div>
+      <div class="field"><label for="experiment-discount">Discount (%)</label><input id="experiment-discount" type="number" name="discount" min="${INPUT_LIMITS.discount.min}" max="${INPUT_LIMITS.discount.max}" step="${INPUT_LIMITS.discount.step}" required value="${escape(draft.discount)}" aria-describedby="discount-preview"></div>
       <div class="field"><label for="experiment-staff">Extra staffing</label><select id="experiment-staff" name="staffing">${STAFF_OPTIONS.map(cents => `<option value="${cents}" ${String(cents) === draft.staffing ? 'selected' : ''}>${wholeMoney(cents)}</option>`).join('')}</select></div>
     </div><p class="hint" id="campaign-hint">Promotion inputs; cups are assumed, not forecast.</p><p class="discount-preview" id="discount-preview">${draftPricePreview(draft)}</p>${costs()}<p id="experiment-error" class="error" role="alert"></p>
     <div class="experiment-actions"><button class="primary" type="submit">Run the day</button>${button('restore', 'Restore promotion')}</div></form>
@@ -159,10 +158,8 @@ function experiment() {
 }
 function draftPricePreview(draft) {
   try {
-    if (!String(draft.discount).trim()) throw new RangeError();
-    const priceCents = moneyToCents(draft.price);
-    if (priceCents < 300 || priceCents > 1000 || priceCents % 50) throw new RangeError();
-    const price = promotionalPrice(priceCents, { kind: 'percent-off', percent: Number(draft.discount) });
+    const { priceCents, promotion } = parsePromotionDraft(draft);
+    const price = promotionalPrice(priceCents, promotion);
     return `Price after discount: ${money(price)} (rounded per cup).`;
   } catch { return 'Enter a valid price and whole-number discount.'; }
 }
@@ -197,12 +194,6 @@ app.addEventListener('click', event => {
   const target = event.target.closest('[data-action]');
   if (!target || target.disabled) return;
   const action = target.dataset.action;
-  if (action === 'detail') {
-    const expanded = target.getAttribute('aria-expanded') !== 'true';
-    target.setAttribute('aria-expanded', String(expanded));
-    document.querySelector('#scene-detail').hidden = !expanded;
-    return;
-  }
   if (action === 'guided' || action === 'explore') { state.mode = action; render(false); app.querySelector(`[data-action="${action}"]`).focus(); return; }
   if (action === 'answer') {
     const check = target.dataset.check;
@@ -265,9 +256,8 @@ app.addEventListener('submit', event => {
       render();
     } else if (event.target.id === 'experiment-form') {
       const draft = state.drafts[state.mode];
-      const inputs = validateExperiment({ cups: Number(draft.cups), extraStaffCents: Number(draft.staffing), priceCents: moneyToCents(draft.price) });
-      if (!String(draft.discount).trim()) throw new RangeError('Enter a whole-number discount from 0 to 100.');
-      state.runs[state.mode] = runPromotion(state.setup, inputs, { kind: 'percent-off', percent: Number(draft.discount) });
+      const { inputs, promotion } = parseExperimentDraft(draft);
+      state.runs[state.mode] = runPromotion(state.setup, inputs, promotion);
       state.dirty[state.mode] = false;
       render(false);
       document.querySelector('#result-announcement').textContent = `${outcome(state.runs[state.mode])}. ${comparison(state.runs[state.mode])}`;

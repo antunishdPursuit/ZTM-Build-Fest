@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { calculateDay, compareDays, runPromotion, promotionalPrice, monthlyEstimate,
-  moneyToCents, validateSetup, validateExperiment, GUIDED } from '../src/model.js';
+  moneyToCents, validateSetup, validateExperiment, GUIDED,
+  parsePromotionDraft, parseExperimentDraft, INPUT_LIMITS } from '../src/model.js';
 
 test('normal day reconciles revenue, both cost groups and profit', () => {
   const day = calculateDay(GUIDED);
@@ -119,4 +120,36 @@ test('invalid editable price or discount cannot produce a completed run', () => 
   for (const percent of [-1, 101, 10.5, NaN]) {
     assert.throws(() => runPromotion(GUIDED, { cups: 140, extraStaffCents: 0 }, { kind: 'percent-off', percent }));
   }
+});
+
+test('price preview and submitted campaign share parsing and cent rounding', () => {
+  const draft = { cups: '150', staffing: '5000', price: '3.50', discount: '13' };
+  const preview = parsePromotionDraft(draft);
+  const submitted = parseExperimentDraft(draft);
+  assert.equal(promotionalPrice(preview.priceCents, preview.promotion), 305);
+  const run = runPromotion(GUIDED, submitted.inputs, submitted.promotion);
+  assert.equal(run.day.priceCents, 305);
+  assert.equal(run.day.profitCents, -14250);
+  assert.equal(monthlyEstimate(run.day).profitCents, -370500);
+});
+
+test('missing or blank form values never silently turn into zero', () => {
+  const valid = { cups: '140', staffing: '0', price: '5.00', discount: '10' };
+  for (const key of Object.keys(valid)) for (const value of ['', ' ', null, undefined, 'NaN', 'Infinity']) {
+    assert.throws(() => parseExperimentDraft({ ...valid, [key]: value }), `${key}: ${value}`);
+  }
+  assert.equal(parsePromotionDraft({ price: '5', discount: '0' }).promotion.percent, 0);
+  assert.equal(parseExperimentDraft({ ...valid, discount: '100' }).promotion.percent, 100);
+});
+
+test('form parser enforces the same bounds and steps as model input rules', () => {
+  const valid = { cups: '140', staffing: '0', price: '5.00', discount: '10' };
+  for (const [key, value] of [['cups', '85'], ['cups', '181'], ['price', '5.25'], ['price', '10.50'], ['discount', '12.5'], ['discount', '101'], ['staffing', '25']]) {
+    assert.throws(() => parseExperimentDraft({ ...valid, [key]: value }));
+  }
+  assert.ok(Object.isFrozen(INPUT_LIMITS));
+  assert.ok(Object.isFrozen(INPUT_LIMITS.priceCents));
+  const low = parseExperimentDraft({ cups: String(INPUT_LIMITS.cups.min), staffing: '0', price: String(INPUT_LIMITS.priceCents.min / 100), discount: String(INPUT_LIMITS.discount.min) });
+  assert.equal(low.inputs.cups, 80);
+  assert.equal(low.inputs.priceCents, 300);
 });
