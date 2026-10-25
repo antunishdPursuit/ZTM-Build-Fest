@@ -24,7 +24,7 @@ This browser application uses in-memory screen state rather than server routes. 
 - Guided and Explore keep separate experiment drafts during the session. Restart lesson restores Guided presets.
 - Monthly estimates multiply every included revenue and cost line by 26 identical trading days.
 - Answers are session-only and persist across Back/Continue. A new/restarted lesson clears them. On question and prediction screens Continue is disabled until any answer is selected. Correctness never prevents continuation; explanatory feedback supports learning, without scores.
-- The fluid lesson frame uses Sales / Costs / Promotion / Your turn indicators, matching brand/topic type size, a larger static scene and its process strip, and one teaching region. It does not duplicate the same numbers in a second metric strip. Comparison figures serve deliberate cross-day recall. Stage indicators do not skip steps.
+- The fluid lesson frame uses a compact header, Sales / Costs / Promotion / Your turn indicators, a larger static scene and one teaching region. Back/Continue sits immediately beneath the scene on wide screens, and follows the teaching region on narrow screens for a natural reading order. The order/preparation/payment strip is removed. Comparison figures serve deliberate cross-day recall. Stage indicators do not skip steps.
 
 ## Extension points
 

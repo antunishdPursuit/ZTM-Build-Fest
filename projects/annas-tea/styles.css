@@ -659,3 +659,30 @@ dd {
 @media(prefers-reduced-motion:reduce) {
   .choice,.choice:hover,.choice:focus-visible,.choice:active { animation:none; transition:none; transform:none; }
 }
+
+/* Compact shared header and navigation beneath the illustration. */
+:root { --nav-title:1.25rem; }
+.header { padding:var(--s2) var(--s6); gap:var(--s4); }
+.header .brand,.header h1 { font-size:var(--nav-title); }
+.header .brand,.header .text-button { min-height:2.75rem; }
+.header-side { gap:var(--s6); }
+.lesson-stages { padding:0 var(--s6); gap:0 var(--s6); }
+.lesson-stages li { min-height:2.75rem; }
+.lesson-layout { grid-template-areas:"visual teaching" "navigation teaching"; grid-template-rows:1fr auto; min-height:calc(100svh - 6.5rem); }
+.lesson-visual { grid-area:visual; display:flex; }
+.lesson-visual .scene { flex:1; }
+.teaching-pane { grid-area:teaching; }
+.lesson-navigation { grid-area:navigation; padding:var(--s3) var(--s6); gap:var(--s4); }
+.lesson-navigation .navigation { gap:var(--s2); }
+.lesson-navigation .primary,.lesson-navigation .text-button { padding:var(--s3) var(--s4); }
+@media(max-width:959px) {
+  .lesson-layout { grid-template-areas:"visual" "teaching" "navigation"; grid-template-rows:auto; min-height:0; }
+}
+@media(max-width:599px) {
+  .header { display:grid; grid-template-columns:1fr auto; gap:0 var(--s3); padding:var(--s2) var(--s4); }
+  .header-side { display:contents; }
+  .header .brand { grid-column:1; grid-row:1; }
+  .header .header-side .text-button { grid-column:2; grid-row:1; }
+  .header h1 { grid-column:1/-1; grid-row:2; margin-bottom:var(--s1); }
+  .lesson-stages { padding:0 var(--s4); gap:0 var(--s4); }
+}

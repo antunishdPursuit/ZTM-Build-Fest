@@ -48,13 +48,13 @@ function frame({ title, stage, question, body, calculation = '', explanation = '
   return `<div class="shell lesson-shell">${header(title)}${stages(stage)}
     <div class="lesson-layout"><section class="lesson-visual" aria-label="The shop">
       ${scene()}
-      <ol class="shop-process" aria-label="Shop process">${[['order', 'Take the order'], ['prepare', 'Prepare the tea'], ['payment', 'Receive payment']].map(([key, label]) => `<li ${key === process ? 'aria-current="step"' : ''}>${label}</li>`).join('')}</ol>
     </section><section class="teaching-pane" aria-labelledby="teaching-question">
       <h2 id="teaching-question">${question}</h2><p class="teaching-body">${body}</p>
       ${calculation ? `<p class="worked-calculation">${calculation}</p>` : ''}
       ${explanation ? `<div class="concept-explanation">${explanation}</div>` : ''}${detail}${check}
-    </section></div>
+    </section>
     <footer class="lesson-navigation"><div><p class="next-topic">Next: ${nextTopic}</p>${needsAnswer ? '<p id="continue-cue" class="continue-cue">Choose a response to continue.</p>' : ''}</div><nav class="navigation" aria-label="Lesson navigation">${button(back, 'Back')}<button type="button" class="primary" data-action="${next}" ${needsAnswer ? 'disabled aria-describedby="continue-cue"' : ''}>Continue</button></nav></footer>
+    </div>
   </div>`;
 }
 function welcome() {
