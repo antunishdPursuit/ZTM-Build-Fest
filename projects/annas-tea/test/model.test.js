@@ -82,3 +82,41 @@ test('invalid, fractional and missing inputs cannot become zero silently', () =>
   assert.throws(() => validateExperiment({ cups: 140, extraStaffCents: 1 }));
   assert.equal(compareDays(calculateDay({ cups: 0, priceCents: 500 }), calculateDay(GUIDED)).outcome, 'loss');
 });
+
+test('editable promotion price and discount leave the normal-day reference unchanged', () => {
+  const setup = { ...GUIDED };
+  const run = runPromotion(setup, { cups: 140, extraStaffCents: 0, priceCents: 600 }, { kind: 'percent-off', percent: 25 });
+  assert.equal(run.priceBeforeDiscountCents, 600);
+  assert.equal(run.day.priceCents, 450);
+  assert.equal(run.day.profitCents, 10000);
+  assert.equal(run.baseline.priceCents, 500);
+  assert.equal(run.baseline.profitCents, 5000);
+  assert.deepEqual(setup, GUIDED);
+});
+
+test('no discount and free-drink promotions reconcile without special revenue paths', () => {
+  for (const [percent, expectedPrice, expectedProfit] of [[0, 550, 24000], [100, 0, -53000]]) {
+    const run = runPromotion(GUIDED, { cups: 140, extraStaffCents: 0, priceCents: 550 }, { kind: 'percent-off', percent });
+    assert.equal(run.day.priceCents, expectedPrice);
+    assert.equal(run.day.profitCents, expectedProfit);
+    assert.equal(run.day.revenueCents - run.day.totalCostCents, expectedProfit);
+  }
+});
+
+test('custom discount rounding is applied per cup before multiplying turnout', () => {
+  const run = runPromotion(GUIDED, { cups: 140, extraStaffCents: 0, priceCents: 550 }, { kind: 'percent-off', percent: 15 });
+  assert.equal(run.day.priceCents, 468);
+  assert.equal(run.day.revenueCents, 65520);
+  assert.equal(run.day.profitCents, 12520);
+  const month = monthlyEstimate(run.day);
+  assert.equal(month.profitCents, 325520);
+});
+
+test('invalid editable price or discount cannot produce a completed run', () => {
+  for (const priceCents of [0, 299, 325, 1001, NaN, Infinity]) {
+    assert.throws(() => runPromotion(GUIDED, { cups: 140, extraStaffCents: 0, priceCents }));
+  }
+  for (const percent of [-1, 101, 10.5, NaN]) {
+    assert.throws(() => runPromotion(GUIDED, { cups: 140, extraStaffCents: 0 }, { kind: 'percent-off', percent }));
+  }
+});

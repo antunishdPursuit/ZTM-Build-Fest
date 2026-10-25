@@ -25,11 +25,15 @@ export function validateSetup({ cups, priceCents }) {
   return Object.freeze({ cups, priceCents });
 }
 
-export function validateExperiment({ cups, extraStaffCents }) {
+export function validateExperiment({ cups, extraStaffCents, priceCents }) {
   integer(cups, 'Cups', 80, 180);
   if (cups % 10 !== 0) throw new RangeError('Use 80–180 cups, in steps of 10.');
   if (!STAFF_OPTIONS.includes(extraStaffCents)) throw new RangeError('Choose an available staffing cost.');
-  return Object.freeze({ cups, extraStaffCents });
+  if (priceCents !== undefined) {
+    integer(priceCents, 'Promotion price', 300, 1000);
+    if (priceCents % 50 !== 0) throw new RangeError('Use a promotion price of $3–$10, in steps of $0.50.');
+  }
+  return Object.freeze({ cups, extraStaffCents, ...(priceCents !== undefined ? { priceCents } : {}) });
 }
 
 // The lesson selects 10%; the rule accepts other percentages without UI changes.
@@ -65,8 +69,10 @@ export function compareDays(day, baseline) {
 export function runPromotion(setup, experiment, promotion = PROMOTION) {
   const baseline = calculateDay(validateSetup(setup));
   const inputs = validateExperiment(experiment);
-  const day = calculateDay({ ...inputs, priceCents: promotionalPrice(baseline.priceCents, promotion) });
-  return Object.freeze({ baseline, day, inputs, promotion: Object.freeze({ ...promotion }), ...compareDays(day, baseline) });
+  const priceBeforeDiscountCents = inputs.priceCents ?? baseline.priceCents;
+  const day = calculateDay({ ...inputs, priceCents: promotionalPrice(priceBeforeDiscountCents, promotion) });
+  return Object.freeze({ baseline, day, inputs, priceBeforeDiscountCents,
+    promotion: Object.freeze({ ...promotion }), ...compareDays(day, baseline) });
 }
 
 export function monthlyEstimate(day, tradingDays = LESSON.tradingDays) {
