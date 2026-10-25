@@ -2,11 +2,14 @@
 
 Learn how prices, sales and costs affect a small tea shop's profit. Follow a normal day, compare a promotion and change the assumptions yourself.
 
+For beginners, more sales can look like success even when discounts and costs leave less profit. This illustrated lesson connects those numbers through a worked example and an editable experiment.
+
 ## Development
 
 Requires Node.js 22 or later. No dependency installation is needed.
 
 ```sh
+cd projects/annas-tea
 npm start
 npm test
 ```
