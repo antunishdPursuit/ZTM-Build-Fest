@@ -728,6 +728,12 @@ dd {
 .summary-breakdowns .ledger { margin-top:var(--s3); }
 .summary-breakdowns .ledger caption { font-size:var(--caption); color:var(--muted); font-weight:400; }
 .summary-panel .result-actions { margin-top:var(--s6); }
+@media(min-width:960px) {
+  /* Result height must not determine the size of the shop artwork. */
+  .experiment-stage { min-height:max(calc(100svh - 6.75rem),calc((100vw - 23rem) / 1.5)); }
+  .experiment-stage > .scene { inset:0 0 auto; height:auto; }
+  .experiment-stage > .scene img { height:auto; aspect-ratio:3/2; }
+}
 @media(max-width:959px) {
   .experiment-stage { display:block; padding:0 0 var(--s4); min-height:0; }
   .experiment-stage > .scene { position:relative; }
