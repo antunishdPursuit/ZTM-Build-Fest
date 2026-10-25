@@ -5,29 +5,31 @@ This browser application uses in-memory screen state rather than server routes. 
 | Screen | Purpose | Next action |
 | --- | --- | --- |
 | Welcome | Explain the business-analytics lesson in the hero; list learning outcomes and choose Guided/Explore in a separate setup section | Choose how to learn, then Start lesson / Explore shop |
-| A normal day | Connect cups and price to revenue with a worked example and optional understanding check | Back / Continue |
-| Costs | Explain cup costs, operating costs and profit with a worked subtraction and optional check | Back / Continue |
-| Prediction | Make an optional prediction about the supplied promotion; Continue also skips the prediction | Back / Continue |
+| A normal day | Show the revenue calculation once; reason about the information needed to compare profit | Choose a response, then Continue |
+| Costs | Derive cup costs and operating costs; compare two ways of improving profit | Choose a response, then Continue |
+| Prediction | Predict the effect of the worked promotion before the reveal | Choose a response, then Continue |
 | Promotion | See the discounted price, assumed turnout and additional cup costs | Back / Continue |
-| Comparison | Explain the change in profit with the change in revenue and costs | Back / Continue |
-| Experiment | Change cups and extra staffing, then run the day | See results |
+| Comparison | Show normal/promotion daily revenue, total costs and profit side by side; explain the difference | Back / Continue |
+| Experiment | Edit cups, price before discount, percentage discount and extra staffing; calculate directly | Run the day / See summary |
 | Results | Show completed daily figures and an optional monthly estimate | Try again / Back to welcome |
 
 ## Model and state
 
 - Guided uses 100 cups at $5. The promotion assumes 140 cups at a 10% discount.
-- Explore setup freezes a custom baseline for its run. Its discounted price derives from that baseline.
+- Explore setup freezes a custom normal-day baseline. Its price supplies the initial campaign price; users can then edit the campaign price and discount without changing the normal-day reference.
 - Editing experiment inputs makes the completed result stale. Run again before viewing results.
-- Restore promotion resets cups/staffing; it does not replace the baseline. Returning to setup and starting again creates a new baseline.
+- Price before discount applies to the promotion only. The normal-day reference stays frozen until the user changes setup. Each completed snapshot records its price, percent, cups and staffing.
+- Editable campaign bounds: 80–180 cups in tens, price $3–$10 in $0.50 steps, discount 0–100 in whole percentages, extra staffing $0/$50/$100/$150. Discounted unit price is rounded to cents once before multiplying cups.
+- Restore promotion resets all campaign inputs (140 cups, normal-day price, 10% discount, no extra staffing), without replacing the baseline. Starting a changed Explore setup creates a new reference and resets dependent inputs/results.
 - Guided and Explore keep separate experiment drafts during the session. Restart lesson restores Guided presets.
 - Monthly estimates multiply every included revenue and cost line by 26 identical trading days.
-- Understanding-check answers are session-only and persist when moving back/forward. Starting or restarting the lesson clears them. No score is recorded and Continue is never gated by an answer.
-- The shared lesson frame uses Sales / Costs / Promotion / Your turn indicators, the same brand/topic type size, a shop illustration, a teaching question, worked calculation and explanation. Stage indicators do not skip steps.
+- Answers are session-only and persist across Back/Continue. A new/restarted lesson clears them. On question and prediction screens Continue is disabled until any answer is selected. Correctness never prevents continuation; explanatory feedback supports learning, without scores.
+- The fluid lesson frame uses Sales / Costs / Promotion / Your turn indicators, matching brand/topic type size, a larger static scene and its process strip, and one teaching region. It does not duplicate the same numbers in a second metric strip. Comparison figures serve deliberate cross-day recall. Stage indicators do not skip steps.
 
 ## Extension points
 
-`src/model.js` owns the financial rules. The current UI selects one 10% lesson scenario; the percentage calculation already accepts other whole-number percentages. Additional promotion kinds belong at the promotional-price boundary, with their own tested accounting rules and explanatory copy. Do not infer demand from discount size. The illustration does not drive the calculation.
+`src/model.js` owns the financial rules. Guided teaching uses the 10% example; the experiment exposes other whole-number percentages and a separate price before discount. Other promotion kinds still need their own tested accounting rules and explanations. Turnout remains an independent input, not demand inferred from discount size. The illustration does not drive the calculation.
 
 ## Accessibility
 
-Use keyboard-operable mode/answer buttons, labeled native fields and disclosures, visible focus and semantic tables. Screen headings receive focus after navigation; answering keeps focus on the selected answer and announces its explanation through the persistent status region. Completed financial results are announced there too. Respect reduced motion; no animation or audio is required. Image failures retain the text lesson and figures. At narrow widths, scene, teaching content and navigation stack in reading order.
+Use keyboard-operable mode/answer buttons, labeled native fields, native disabled Continue with a visible instruction, disclosures, focus and semantic tables. Screen headings receive focus after navigation; selecting an answer retains focus and announces feedback. Completed results are announced and focused without replaying the lesson. Choices have modest hover/focus and one-time entry emphasis; reduced motion removes movement. No looping pulse or audio. Image failures retain text/calculations. At narrow or zoomed widths content stacks and scrolls naturally; no instructional content is clipped to force a viewport fit.
