@@ -35,7 +35,22 @@ function frame(title, content, nextAction, nextLabel, backAction, hotspot = '', 
 }
 function welcome() {
   const guided = state.mode === 'guided';
-  return `<section class="hero"><form class="welcome-panel" id="setup-form">${heading('Welcome to<br>Anna’s Tea')}<p class="purpose">See how prices, sales and costs affect a tea shop’s profit.</p><div class="mode" role="group" aria-label="Learning mode"><button type="button" data-action="guided" aria-pressed="${guided}">Guided lesson</button><button type="button" data-action="explore" aria-pressed="${!guided}">Explore</button></div><div class="fields"><div class="field"><label for="setup-cups">Cups per day</label>${guided ? '<output id="setup-cups">100</output>' : `<input id="setup-cups" name="cups" type="number" min="80" max="180" step="10" required value="${escape(state.setupDraft.cups)}">`}</div><div class="field"><label for="setup-price">Price per cup</label>${guided ? '<output id="setup-price">$5.00</output>' : `<input id="setup-price" name="price" type="number" min="3" max="10" step="0.5" required value="${escape(state.setupDraft.price)}">`}</div></div>${costs()}<p class="error" id="setup-error" role="alert"></p><button type="submit" class="primary">${guided ? 'Start lesson' : 'Explore shop'}</button></form></section>`;
+  return `<section class="hero home-hero"><div class="hero-copy">
+    ${heading('Welcome to<br>Anna’s Tea')}
+    <p class="hero-purpose">Learn business analytics by following a shop’s money.</p>
+    <p class="hero-explanation">See what comes in, what goes out, and whether a promotion leaves the shop better off.</p>
+    <a class="primary" href="#learn">Choose how to learn</a>
+  </div></section>
+  <section class="home-setup" aria-labelledby="learn"><div class="learning-outcomes">
+    <h2 id="learn" tabindex="-1">A first lesson in<br>business analytics.</h2>
+    <ul><li>Understand revenue, costs and profit.</li><li>Compare a normal day with a promotion.</li><li>Test when more sales stop helping.</li></ul>
+  </div><form class="setup-form" id="setup-form" aria-label="Lesson setup">
+    <div class="mode" role="group" aria-label="Learning mode"><button type="button" data-action="guided" aria-pressed="${guided}">Guided lesson</button><button type="button" data-action="explore" aria-pressed="${!guided}">Explore</button></div>
+    <p class="mode-description">${guided ? 'Follow the lesson, then try your own changes.' : 'Set your normal day, then test a promotion.'}</p>
+    <div class="fields"><div class="field"><label for="setup-cups">Cups per day</label>${guided ? '<output id="setup-cups">100</output>' : `<input id="setup-cups" name="cups" type="number" min="80" max="180" step="10" required value="${escape(state.setupDraft.cups)}">`}</div><div class="field"><label for="setup-price">Price per cup</label>${guided ? '<output id="setup-price">$5.00</output>' : `<input id="setup-price" name="price" type="number" min="3" max="10" step="0.5" required value="${escape(state.setupDraft.price)}">`}</div></div>
+    ${costs()}<p class="error" id="setup-error" role="alert"></p>
+    <button type="submit" class="primary">${guided ? 'Start lesson' : 'Explore shop'}</button>
+  </form></section>`;
 }
 function guidedScreen() {
   const day = baseline();

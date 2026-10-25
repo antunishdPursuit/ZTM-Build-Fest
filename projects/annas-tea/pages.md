@@ -4,7 +4,7 @@ This browser application uses in-memory screen state rather than server routes. 
 
 | Screen | Purpose | Next action |
 | --- | --- | --- |
-| Welcome | Select Guided lesson or Explore; Explore edits the normal-day cups and price | Start lesson / Explore shop |
+| Welcome | Explain the business-analytics lesson in the hero; list learning outcomes and choose Guided/Explore in a separate setup section | Choose how to learn, then Start lesson / Explore shop |
 | A normal day | Connect cups and price to revenue | See costs |
 | Costs | Explain cup costs, operating costs and the profit left over | Try a promotion |
 | Prediction | Make an optional prediction about the supplied promotion | See what happens / Skip prediction |

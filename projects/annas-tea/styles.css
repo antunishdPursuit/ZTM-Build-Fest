@@ -526,3 +526,43 @@ dd {
   animation:none!important;
   transition:none!important}
 }
+
+/* Homepage: orientation and setup are distinct sections. */
+.home-hero {
+  min-height:35rem;
+  padding:var(--s12);
+}
+.hero-copy {
+  width:30.5rem;
+  max-width:100%;
+  padding:var(--s8);
+  border-radius:var(--hero-radius);
+  background:var(--cream);
+}
+.hero-copy h1 { font-size:var(--hero); line-height:1.1; }
+.hero-purpose { font-size:var(--section); line-height:1.3; margin-top:var(--s6); }
+.hero-explanation { color:var(--muted); margin-top:var(--s4); }
+.hero-copy .primary { display:inline-flex; align-items:center; text-decoration:none; margin-top:var(--s6); }
+.home-setup {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  max-width:var(--wide);
+  margin:auto;
+  padding:var(--s12);
+  gap:var(--s12);
+}
+.learning-outcomes h2 { font-size:var(--title); }
+.learning-outcomes ul { margin:var(--s6) 0 0; padding-left:var(--s6); }
+.learning-outcomes li { padding:var(--s2) 0; }
+.setup-form { min-width:0; }
+.setup-form .mode { margin-top:0; }
+.mode-description { color:var(--muted); margin-top:var(--s4); }
+.setup-form details { margin-top:var(--s6); }
+.setup-form .primary { width:100%; margin-top:var(--s4); }
+@media(max-width:599px) {
+  .home-hero { padding:13rem var(--s4) var(--s6); min-height:0; background-size:auto 32rem; }
+  .hero-copy { padding:var(--s6); }
+  .hero-purpose { font-size:var(--narration); }
+  .home-setup { grid-template-columns:1fr; padding:var(--s8) var(--s6); gap:var(--s8); }
+  .learning-outcomes h2 { font-size:var(--section); }
+}
